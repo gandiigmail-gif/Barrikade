@@ -1,0 +1,1392 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Barrikade</title>
+
+<style>
+
+body{
+    margin:0;
+    background:#2f2f2f;
+    overflow:hidden;
+    font-family:Arial;
+    color:white;
+    touch-action:none;
+}
+
+#game{
+    width:100vw;
+    height:100vh;
+    position:relative;
+}
+
+/* ================= TITLE ================= */
+
+#title{
+
+    position:absolute;
+
+    top:10px;
+    left:50%;
+
+    transform:translateX(-50%);
+
+    font-size:18px;
+    font-weight:bold;
+    letter-spacing:2px;
+}
+
+/* ================= BOARD ================= */
+
+#board{
+
+    position:absolute;
+
+    left:50%;
+    top:50%;
+
+    transform:translate(-50%,-50%);
+
+    width:92vw;
+    height:92vw;
+
+    max-width:680px;
+    max-height:680px;
+}
+
+/* ================= GRID ================= */
+
+.hLine{
+    position:absolute;
+    height:1px;
+    background:#97a1ab;
+}
+
+.vLine{
+    position:absolute;
+    width:1px;
+    background:#97a1ab;
+}
+
+/* ================= PLAYER ================= */
+
+.player{
+
+    position:absolute;
+
+    width:25px;
+    height:25px;
+
+    border-radius:50%;
+
+    z-index:20;
+
+    transition:0.15s;
+}
+
+#player1{
+    background:#ff1744;
+}
+
+#player2{
+    background:#2962ff;
+}
+
+/* ================= MOVE ================= */
+
+.moveIndicator{
+
+    position:absolute;
+
+    width:20px;
+    height:20px;
+
+    border-radius:6px;
+
+    z-index:5;
+}
+
+.redMove{
+    background:rgba(255,70,90,0.18);
+}
+
+.blueMove{
+    background:rgba(60,120,255,0.18);
+}
+
+/* ================= WALL ================= */
+
+.wallVertical{
+
+    position:absolute;
+
+    width:6px;
+
+    height:calc(180% / 9);
+
+    background:white;
+
+    border-radius:2px;
+
+    z-index:30;
+}
+
+.wallHorizontal{
+
+    position:absolute;
+
+    width:calc(180% / 9);
+
+    height:6px;
+
+    background:white;
+
+    border-radius:2px;
+
+    z-index:30;
+}
+
+/* ================= PLAYER INFO ================= */
+
+.playerInfo{
+
+    position:absolute;
+
+    display:flex;
+    align-items:center;
+
+    gap:10px;
+
+    font-size:14px;
+}
+
+#player2Info{
+    top:150px;
+    left:14px;
+}
+
+#player1Info{
+    bottom:150px;
+    left:14px;
+}
+
+/* ================= PROFILE ================= */
+
+.profile{
+
+    width:32px;
+    height:32px;
+
+    position:relative;
+}
+
+.profile::before{
+
+    content:"";
+
+    position:absolute;
+
+    width:12px;
+    height:12px;
+
+    border-radius:50%;
+
+    background:white;
+
+    left:10px;
+    top:0;
+}
+
+.profile::after{
+
+    content:"";
+
+    position:absolute;
+
+    width:20px;
+    height:14px;
+
+    background:white;
+
+    border-radius:5px 5px 2px 2px;
+
+    left:6px;
+    bottom:0;
+}
+
+/* ================= TIMER ================= */
+
+.timer{
+    font-size:15px;
+}
+
+.wallCount{
+    color:#ccc;
+    font-size:13px;
+}
+
+/* ================= WALL TOOL ================= */
+
+.wallTools{
+
+    position:absolute;
+
+    display:flex;
+
+    gap:60px;
+
+    left:55%;
+
+    transform:translateX(-50%);
+}
+
+#topTools{
+    top:130px;
+}
+
+#bottomTools{
+    bottom:130px;
+}
+
+.wallToolVertical{
+
+    width:8px;
+    height:55px;
+
+    background:white;
+
+    border-radius:2px;
+}
+
+.wallToolHorizontal{
+
+    width:55px;
+    height:8px;
+
+    background:white;
+
+    border-radius:2px;
+}
+
+/* ================= WARNING ================= */
+
+#warning{
+
+    position:absolute;
+
+    top:42px;
+    left:50%;
+
+    transform:translateX(-50%);
+
+    color:#ff7070;
+
+    font-size:14px;
+    font-weight:bold;
+
+    z-index:100;
+}
+
+/* ================= UNDO ================= */
+
+#undoBtn{
+
+    position:absolute;
+
+    bottom:8px;
+    left:50%;
+
+    transform:translateX(-50%);
+
+    background:none;
+    border:none;
+
+    color:white;
+
+    font-size:32px;
+}
+
+/* ================= WIN SCREEN ================= */
+
+#winScreen{
+
+    position:absolute;
+
+    inset:0;
+
+    background:rgba(0,0,0,0.82);
+
+    display:none;
+
+    justify-content:center;
+    align-items:center;
+
+    flex-direction:column;
+
+    z-index:999;
+}
+
+#winText{
+
+    font-size:42px;
+    font-weight:bold;
+
+    animation:pop 0.5s ease;
+}
+
+#loseText{
+
+    margin-top:10px;
+
+    font-size:22px;
+
+    opacity:0.8;
+}
+
+.winButtons{
+
+    margin-top:40px;
+
+    display:flex;
+
+    gap:40px;
+}
+
+.winBtn{
+
+    width:120px;
+    height:45px;
+
+    border:none;
+
+    border-radius:8px;
+
+    font-size:16px;
+    font-weight:bold;
+}
+
+#rematchBtn{
+    background:#2962ff;
+    color:white;
+}
+
+#exitBtn{
+    background:#ff1744;
+    color:white;
+}
+
+@keyframes pop{
+
+    0%{
+        transform:scale(0.5);
+        opacity:0;
+    }
+
+    100%{
+        transform:scale(1);
+        opacity:1;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="game">
+
+<div id="title">
+BARRIKADE
+</div>
+
+<div id="warning"></div>
+
+<!-- PLAYER 2 -->
+
+<div id="player2Info"
+class="playerInfo">
+
+    <div class="profile"></div>
+
+    <div>
+
+        Player 2
+
+        <div id="timer2"
+        class="timer">
+            03:00
+        </div>
+
+        <div id="wall2"
+        class="wallCount">
+            🧱 10
+        </div>
+
+    </div>
+
+</div>
+
+<!-- WALL TOOL TOP -->
+
+<div id="topTools"
+class="wallTools">
+
+    <div id="topVertical"
+    class="wallToolVertical"></div>
+
+    <div id="topHorizontal"
+    class="wallToolHorizontal"></div>
+
+</div>
+
+<!-- BOARD -->
+
+<div id="board">
+
+    <div id="player1"
+    class="player"></div>
+
+    <div id="player2"
+    class="player"></div>
+
+</div>
+
+<!-- WALL TOOL BOTTOM -->
+
+<div id="bottomTools"
+class="wallTools">
+
+    <div id="bottomVertical"
+    class="wallToolVertical"></div>
+
+    <div id="bottomHorizontal"
+    class="wallToolHorizontal"></div>
+
+</div>
+
+<!-- PLAYER 1 -->
+
+<div id="player1Info"
+class="playerInfo">
+
+    <div class="profile"></div>
+
+    <div>
+
+        Player 1
+
+        <div id="timer1"
+        class="timer">
+            03:00
+        </div>
+
+        <div id="wall1"
+        class="wallCount">
+            🧱 10
+        </div>
+
+    </div>
+
+</div>
+
+<!-- UNDO -->
+
+<button id="undoBtn">
+↶
+</button>
+
+<!-- WIN -->
+
+<div id="winScreen">
+
+    <div id="winText">
+        Merah Menang
+    </div>
+
+    <div id="loseText">
+        Biru Kalah
+    </div>
+
+    <div class="winButtons">
+
+        <button id="rematchBtn"
+        class="winBtn">
+            Rematch
+        </button>
+
+        <button id="exitBtn"
+        class="winBtn">
+            Exit
+        </button>
+
+    </div>
+
+</div>
+
+</div>
+
+<script>
+
+/* ================= ELEMENT ================= */
+
+const board =
+document.getElementById("board");
+
+const player1 =
+document.getElementById("player1");
+
+const player2 =
+document.getElementById("player2");
+
+const warning =
+document.getElementById("warning");
+
+const winScreen =
+document.getElementById("winScreen");
+
+const winText =
+document.getElementById("winText");
+
+const loseText =
+document.getElementById("loseText");
+
+/* ================= DATA ================= */
+
+let p1 = {x:4,y:8};
+let p2 = {x:4,y:0};
+
+let turn = 1;
+
+let wallCount1 = 10;
+let wallCount2 = 10;
+
+let blocked = [];
+let walls = [];
+
+let history = [];
+
+/* ================= TIMER ================= */
+
+let time1 = 180;
+let time2 = 180;
+
+function format(sec){
+
+    let m =
+    Math.floor(sec/60);
+
+    let s =
+    sec%60;
+
+    if(s<10)
+    s = "0"+s;
+
+    return m+":"+s;
+}
+
+function updateTimer(){
+
+    timer1.innerHTML =
+    format(time1);
+
+    timer2.innerHTML =
+    format(time2);
+}
+
+updateTimer();
+
+setInterval(()=>{
+
+    if(
+        winScreen.style.display==="flex"
+    ) return;
+
+    if(turn===1){
+
+        time1--;
+
+        if(time1<=0){
+
+            showWinner(
+                "Biru Menang",
+                "Merah Kalah"
+            );
+        }
+
+    }else{
+
+        time2--;
+
+        if(time2<=0){
+
+            showWinner(
+                "Merah Menang",
+                "Biru Kalah"
+            );
+        }
+    }
+
+    updateTimer();
+
+},1000);
+
+/* ================= GRID ================= */
+
+function createGrid(){
+
+    const size =
+    board.offsetWidth / 9;
+
+    for(let y=0;y<=9;y++){
+
+        for(let x=0;x<9;x++){
+
+            const h =
+            document.createElement("div");
+
+            h.className =
+            "hLine";
+
+            h.style.width =
+            (size-24)+"px";
+
+            h.style.left =
+            (x*size+12)+"px";
+
+            h.style.top =
+            (y*size)+"px";
+
+            board.appendChild(h);
+        }
+    }
+
+    for(let x=0;x<=9;x++){
+
+        for(let y=0;y<9;y++){
+
+            const v =
+            document.createElement("div");
+
+            v.className =
+            "vLine";
+
+            v.style.height =
+            (size-24)+"px";
+
+            v.style.left =
+            (x*size)+"px";
+
+            v.style.top =
+            (y*size+12)+"px";
+
+            board.appendChild(v);
+        }
+    }
+}
+
+createGrid();
+
+/* ================= CELL ================= */
+
+function cell(){
+
+    return board.offsetWidth / 9;
+}
+
+/* ================= PLAYER ================= */
+
+function updatePlayer(){
+
+    const c = cell();
+
+    player1.style.left =
+    (p1.x*c + c/2 - 11)+"px";
+
+    player1.style.top =
+    (p1.y*c + c/2 - 11)+"px";
+
+    player2.style.left =
+    (p2.x*c + c/2 - 11)+"px";
+
+    player2.style.top =
+    (p2.y*c + c/2 - 11)+"px";
+
+    showMove();
+}
+
+updatePlayer();
+
+/* ================= SAVE ================= */
+
+function saveHistory(){
+
+    history.push({
+
+        p1:{...p1},
+        p2:{...p2},
+
+        turn,
+
+        wallCount1,
+        wallCount2,
+
+        blocked:
+        JSON.parse(
+        JSON.stringify(blocked)
+        ),
+
+        walls:
+        JSON.parse(
+        JSON.stringify(walls)
+        )
+
+    });
+}
+
+/* ================= UNDO ================= */
+
+undoBtn.onclick = ()=>{
+
+    if(history.length<=0)
+    return;
+
+    const last =
+    history.pop();
+
+    p1 = last.p1;
+    p2 = last.p2;
+
+    turn = last.turn;
+
+    wallCount1 =
+    last.wallCount1;
+
+    wallCount2 =
+    last.wallCount2;
+
+    blocked =
+    last.blocked;
+
+    walls =
+    last.walls;
+
+    redrawWalls();
+
+    wall1.innerHTML =
+    "🧱 " + wallCount1;
+
+    wall2.innerHTML =
+    "🧱 " + wallCount2;
+
+    updatePlayer();
+};
+
+/* ================= REDRAW ================= */
+
+function redrawWalls(){
+
+    document
+    .querySelectorAll(
+        ".wallVertical,.wallHorizontal"
+    )
+    .forEach(el=>el.remove());
+
+    const c = cell();
+
+    walls.forEach(w=>{
+
+        const wall =
+        document.createElement("div");
+
+        wall.className =
+        w.type==="vertical"
+        ? "wallVertical"
+        : "wallHorizontal";
+
+        if(w.type==="vertical"){
+
+            wall.style.left =
+            (w.gx*c - 3)+"px";
+
+            wall.style.top =
+            ((w.gy-1)*c + 8)+"px";
+
+        }else{
+
+            wall.style.left =
+            ((w.gx-1)*c + 8)+"px";
+
+            wall.style.top =
+            (w.gy*c - 3)+"px";
+        }
+
+        board.appendChild(wall);
+
+    });
+}
+
+/* ================= BLOCK ================= */
+
+function isBlocked(x1,y1,x2,y2){
+
+    return blocked.some(b=>
+
+        (
+            b.x1===x1 &&
+            b.y1===y1 &&
+            b.x2===x2 &&
+            b.y2===y2
+        )
+
+        ||
+
+        (
+            b.x1===x2 &&
+            b.y1===y2 &&
+            b.x2===x1 &&
+            b.y2===y1
+        )
+
+    );
+}
+
+/* ================= PATH ================= */
+
+function hasPath(startX,startY,target){
+
+    let queue = [];
+
+    let visited = [];
+
+    queue.push({
+        x:startX,
+        y:startY
+    });
+
+    visited.push(
+    startX+"-"+startY
+    );
+
+    while(queue.length){
+
+        let current =
+        queue.shift();
+
+        if(current.y===target)
+        return true;
+
+        const dirs = [
+
+            {x:0,y:-1},
+            {x:0,y:1},
+            {x:-1,y:0},
+            {x:1,y:0}
+
+        ];
+
+        for(let d of dirs){
+
+            let nx =
+            current.x+d.x;
+
+            let ny =
+            current.y+d.y;
+
+            if(
+                nx>=0 &&
+                nx<9 &&
+                ny>=0 &&
+                ny<9
+            ){
+
+                if(
+                    !isBlocked(
+                        current.x,
+                        current.y,
+                        nx,
+                        ny
+                    )
+                ){
+
+                    let key =
+                    nx+"-"+ny;
+
+                    if(
+                        !visited.includes(key)
+                    ){
+
+                        visited.push(key);
+
+                        queue.push({
+                            x:nx,
+                            y:ny
+                        });
+                    }
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
+/* ================= MOVE ================= */
+
+function showMove(){
+
+    document
+    .querySelectorAll(
+        ".moveIndicator"
+    )
+    .forEach(el=>el.remove());
+
+    let player =
+    turn===1 ? p1 : p2;
+
+    let enemy =
+    turn===1 ? p2 : p1;
+
+    let color =
+    turn===1
+    ? "redMove"
+    : "blueMove";
+
+    const dirs = [
+
+        {x:0,y:-1},
+        {x:0,y:1},
+        {x:-1,y:0},
+        {x:1,y:0}
+
+    ];
+
+    dirs.forEach(dir=>{
+
+        let nx =
+        player.x + dir.x;
+
+        let ny =
+        player.y + dir.y;
+
+        if(
+            nx<0 || nx>8 ||
+            ny<0 || ny>8
+        ) return;
+
+        if(
+            isBlocked(
+                player.x,
+                player.y,
+                nx,
+                ny
+            )
+        ) return;
+
+        if(
+            enemy.x===nx &&
+            enemy.y===ny
+        ){
+
+            let jumpX =
+            nx + dir.x;
+
+            let jumpY =
+            ny + dir.y;
+
+            if(
+                jumpX>=0 &&
+                jumpX<=8 &&
+                jumpY>=0 &&
+                jumpY<=8 &&
+                !isBlocked(
+                    enemy.x,
+                    enemy.y,
+                    jumpX,
+                    jumpY
+                )
+            ){
+
+                nx = jumpX;
+                ny = jumpY;
+
+            }else{
+                return;
+            }
+        }
+
+        const m =
+        document.createElement("div");
+
+        m.className =
+        "moveIndicator " + color;
+
+        m.style.left =
+        (nx*cell()+cell()/2-8)+"px";
+
+        m.style.top =
+        (ny*cell()+cell()/2-8)+"px";
+
+        m.onclick = ()=>{
+
+            saveHistory();
+
+            if(turn===1){
+
+                p1.x = nx;
+                p1.y = ny;
+
+                turn = 2;
+
+            }else{
+
+                p2.x = nx;
+                p2.y = ny;
+
+                turn = 1;
+            }
+
+            updatePlayer();
+
+            checkWin();
+        };
+
+        board.appendChild(m);
+
+    });
+}
+
+/* ================= WALL TOOL ================= */
+
+[
+["topVertical","vertical"],
+["topHorizontal","horizontal"],
+["bottomVertical","vertical"],
+["bottomHorizontal","horizontal"]
+
+].forEach(item=>{
+
+    createWallTool(
+        document.getElementById(item[0]),
+        item[1]
+    );
+
+});
+
+function createWallTool(tool,type){
+
+    tool.addEventListener(
+    "pointerdown",
+    function(e){
+
+        let wall =
+        document.createElement("div");
+
+        wall.className =
+        type==="vertical"
+        ? "wallVertical"
+        : "wallHorizontal";
+
+        board.appendChild(wall);
+
+        const rect =
+        board.getBoundingClientRect();
+
+        function moveAt(x,y){
+
+            wall.style.left =
+            (
+                x - rect.left
+                - wall.offsetWidth/2
+            ) + "px";
+
+            wall.style.top =
+            (
+                y - rect.top
+                - wall.offsetHeight/2
+            ) + "px";
+        }
+
+        moveAt(
+            e.clientX,
+            e.clientY
+        );
+
+        function onMove(ev){
+
+            moveAt(
+                ev.clientX,
+                ev.clientY
+            );
+        }
+
+        document.addEventListener(
+            "pointermove",
+            onMove
+        );
+
+        document.addEventListener(
+            "pointerup",
+            function(ev){
+
+                document.removeEventListener(
+                    "pointermove",
+                    onMove
+                );
+
+                placeWall(
+                    wall,
+                    type,
+                    ev
+                );
+
+            },
+            {once:true}
+        );
+
+    });
+
+}
+
+/* ================= PLACE WALL ================= */
+
+function placeWall(
+wall,
+type,
+ev
+){
+
+    const rect =
+    board.getBoundingClientRect();
+
+    const c = cell();
+
+    let gx =
+    Math.round(
+        (ev.clientX - rect.left)
+        / c
+    );
+
+    let gy =
+    Math.round(
+        (ev.clientY - rect.top)
+        / c
+    );
+
+    if(
+        gx<1 || gx>8 ||
+        gy<1 || gy>8
+    ){
+
+        wall.remove();
+        return;
+    }
+
+    const same =
+    walls.some(w=>
+
+        w.type===type &&
+        w.gx===gx &&
+        w.gy===gy
+
+    );
+
+    if(same){
+
+        wall.remove();
+
+        warning.innerHTML =
+        "papan tidak bisa ditimpa";
+
+        setTimeout(()=>{
+            warning.innerHTML="";
+        },2000);
+
+        return;
+    }
+
+    saveHistory();
+
+    let tempBlock = [];
+
+    if(type==="vertical"){
+
+        tempBlock.push({
+
+            x1:gx-1,
+            y1:gy-1,
+
+            x2:gx,
+            y2:gy-1
+        });
+
+        tempBlock.push({
+
+            x1:gx-1,
+            y1:gy,
+
+            x2:gx,
+            y2:gy
+        });
+
+    }else{
+
+        tempBlock.push({
+
+            x1:gx-1,
+            y1:gy-1,
+
+            x2:gx-1,
+            y2:gy
+        });
+
+        tempBlock.push({
+
+            x1:gx,
+            y1:gy-1,
+
+            x2:gx,
+            y2:gy
+        });
+    }
+
+    blocked.push(...tempBlock);
+
+    const p1Path =
+    hasPath(
+        p1.x,
+        p1.y,
+        0
+    );
+
+    const p2Path =
+    hasPath(
+        p2.x,
+        p2.y,
+        8
+    );
+
+    if(
+        !p1Path ||
+        !p2Path
+    ){
+
+        blocked.splice(
+            blocked.length -
+            tempBlock.length,
+            tempBlock.length
+        );
+
+        wall.remove();
+
+        history.pop();
+
+        warning.innerHTML =
+        "jalan tidak bisa ditutup";
+
+        setTimeout(()=>{
+            warning.innerHTML="";
+        },2000);
+
+        return;
+    }
+
+    if(type==="vertical"){
+
+        wall.style.left =
+        (gx*c - 3)+"px";
+
+        wall.style.top =
+        ((gy-1)*c + 8)+"px";
+
+    }else{
+
+        wall.style.left =
+        ((gx-1)*c + 8)+"px";
+
+        wall.style.top =
+        (gy*c - 3)+"px";
+    }
+
+    walls.push({
+        type,
+        gx,
+        gy
+    });
+
+    if(turn===1){
+
+        wallCount1--;
+
+        wall1.innerHTML =
+        "🧱 " + wallCount1;
+
+        turn = 2;
+
+    }else{
+
+        wallCount2--;
+
+        wall2.innerHTML =
+        "🧱 " + wallCount2;
+
+        turn = 1;
+    }
+
+    showMove();
+}
+
+/* ================= WIN ================= */
+
+function showWinner(
+winner,
+loser
+){
+
+    winText.innerHTML =
+    winner;
+
+    loseText.innerHTML =
+    loser;
+
+    winScreen.style.display =
+    "flex";
+}
+
+function checkWin(){
+
+    if(p1.y===0){
+
+        showWinner(
+            "Merah Menang",
+            "Biru Kalah"
+        );
+    }
+
+    if(p2.y===8){
+
+        showWinner(
+            "Biru Menang",
+            "Merah Kalah"
+        );
+    }
+}
+
+/* ================= BUTTON ================= */
+
+rematchBtn.onclick = ()=>{
+
+    location.reload();
+};
+
+exitBtn.onclick = ()=>{
+
+    location.href = "about:blank";
+};
+
+</script>
+
+</body>
+</html>
